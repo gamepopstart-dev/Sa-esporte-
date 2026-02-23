@@ -1,15 +1,74 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SA ESPORTE</title>
   <meta charset="UTF-8">
+  <title>SA ESPORTE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #0f0f0f;
+      color: white;
+    }
+    header {
+      background-color: #16c60c;
+      padding: 15px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+    }
+    .container {
+      padding: 15px;
+    }
+    .card {
+      background-color: #1c1c1c;
+      margin-bottom: 15px;
+      padding: 15px;
+      border-radius: 10px;
+    }
+    .live {
+      color: #16c60c;
+      font-weight: bold;
+    }
+    button {
+      background-color: #16c60c;
+      border: none;
+      padding: 10px;
+      color: black;
+      font-weight: bold;
+      border-radius: 5px;
+      width: 100%;
+      margin-top: 10px;
+    }
+  </style>
 </head>
-<body style="background-color:black; color:white; text-align:center;">
+<body>
 
-  <h1>SA ESPORTE</h1>
-  <p>Bem-vindo ao site oficial</p>
-  <p>O site está funcionando com sucesso.</p>
+<header>SA ESPORTE</header>
+
+<div class="container">
+
+  <div class="card">
+    <div class="live">AO VIVO</div>
+    <h3>Flamengo 1 x 0 Palmeiras</h3>
+    <p>45' - 1º Tempo</p>
+    <button>Ver detalhes</button>
+  </div>
+
+  <div class="card">
+    <h3>Corinthians x São Paulo</h3>
+    <p>Hoje - 20:00</p>
+    <button>Ver detalhes</button>
+  </div>
+
+  <div class="card">
+    <h3>Barcelona 2 x 2 Real Madrid</h3>
+    <p>Finalizado</p>
+    <button>Ver detalhes</button>
+  </div>
+
+</div>
 
 </body>
 </html>
-
