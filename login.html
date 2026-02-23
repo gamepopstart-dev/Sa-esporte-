@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Login - SA ESPORTE</title>
+<meta charset="UTF-8">
+<style>
+body {
+background:black;
+color:white;
+text-align:center;
+font-family:Arial;
+}
+input, button {
+padding:10px;
+margin:10px;
+width:200px;
+}
+button {
+background:#16c60c;
+border:none;
+}
+</style>
+</head>
+<body>
+
+<h2>SA ESPORTE LOGIN</h2>
+
+<input type="text" id="user" placeholder="Usuário"><br>
+<input type="password" id="pass" placeholder="Senha"><br>
+
+<button onclick="login()">Entrar</button>
+
+<script>
+function login(){
+var u = document.getElementById("user").value;
+var p = document.getElementById("pass").value;
+
+if(u=="admin" && p=="123456"){
+window.location.href="painel.html";
+}else{
+alert("Senha incorreta");
+}
+}
+</script>
+
+</body>
+</html>
