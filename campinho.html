@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>SA ESPORTE</title>
+
+<script>
+(function(a,b,c,d,e,f,g,h,i){
+a[e]||(i=a[e]=function(){(a[e].q=a[e].q||[]).push(arguments)},
+i.l=1*new Date,i.o=f,
+g=b.createElement(c),h=b.getElementsByTagName(c)[0],
+g.async=1,g.src=d,g.setAttribute("n",e),
+h.parentNode.insertBefore(g,h)
+)})(window,document,"script",
+"https://widgets.sir.sportradar.com/a848ae31ef086784f86385112e9abfb0/widgetloader",
+"SIR",{theme:false,language:"br"});
+</script>
+
+<style>
+body{
+margin:0;
+background:black;
+color:white;
+font-family:Arial;
+}
+
+#widgets{
+width:100%;
+height:100vh;
+}
+</style>
+
+</head>
+<body>
+
+<div id="widgets">
+<div class="sr-widget sr-widget-1"></div>
+</div>
+
+<script>
+SIR("addWidget", ".sr-widget-1", "match.lmtPlus", {
+layout:"single",
+scoreboard:"extended",
+language:"br"
+});
+</script>
+
+</body>
+</html>
