@@ -1,8 +1,9 @@
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
+<script>
   const firebaseConfig = {
     apiKey: "AIzaSyB62bOVcwY2U7sh8QxLHKprxsO5qYddf8c",
     authDomain: "simuladoraposta.firebaseapp.com",
@@ -12,32 +13,31 @@
     appId: "1:96609178130:web:215bc79f33c217c77ffecb"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
-  const db = getFirestore(app);
+  firebase.initializeApp(firebaseConfig);
 
-  // Criar conta
-  window.registrar = async function(email, senha) {
-    try {
-      const userCred = await createUserWithEmailAndPassword(auth, email, senha);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
 
-      await setDoc(doc(db, "users", userCred.user.uid), {
-        saldo: 2000
+  function registrar(email, senha) {
+    auth.createUserWithEmailAndPassword(email, senha)
+      .then((userCred) => {
+        db.collection("users").doc(userCred.user.uid).set({
+          saldo: 2000
+        });
+        alert("Conta criada com R$ 2000!");
+      })
+      .catch((error) => {
+        alert(error.message);
       });
+  }
 
-      alert("Conta criada com R$ 2000!");
-    } catch (error) {
-      alert(error.message);
-    }
-  };
-
-  // Login
-  window.login = async function(email, senha) {
-    try {
-      await signInWithEmailAndPassword(auth, email, senha);
-      alert("Login realizado!");
-    } catch (error) {
-      alert(error.message);
-    }
-  };
+  function login(email, senha) {
+    auth.signInWithEmailAndPassword(email, senha)
+      .then(() => {
+        alert("Login realizado!");
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
+  }
 </script>
