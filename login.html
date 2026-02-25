@@ -1,47 +1,33 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Login - SA ESPORTE</title>
-<meta charset="UTF-8">
-<style>
-body {
-background:black;
-color:white;
-text-align:center;
-font-family:Arial;
-}
-input, button {
-padding:10px;
-margin:10px;
-width:200px;
-}
-button {
-background:#16c60c;
-border:none;
-}
-</style>
-</head>
-<body>
-
-<h2>SA ESPORTE LOGIN</h2>
-
-<input type="text" id="user" placeholder="Usuário"><br>
-<input type="password" id="pass" placeholder="Senha"><br>
-
-<button onclick="login()">Entrar</button>
-
 <script>
-function login(){
-var u = document.getElementById("user").value;
-var p = document.getElementById("pass").value;
+function login(email, senha) {
+  auth.signInWithEmailAndPassword(email, senha)
+    .then((userCred) => {
 
-if(u=="admin" && p=="123456"){
-window.location.href="painel.html";
-}else{
-alert("Senha incorreta");
+      alert("Login realizado!");
+
+      // 🔥 Pega o saldo do usuário
+      db.collection("users").doc(userCred.user.uid).get()
+        .then((doc) => {
+
+          const saldo = doc.data().saldo;
+
+          // 🔥 Mostra nova tela
+          document.body.innerHTML = `
+            <h1>Bem-vindo!</h1>
+            <h2>Seu saldo: R$ ${saldo}</h2>
+            <button onclick="logout()">Sair</button>
+          `;
+        });
+
+    })
+    .catch((error) => {
+      alert(error.message);
+    });
 }
+
+function logout() {
+  auth.signOut().then(() => {
+    location.reload();
+  });
 }
 </script>
-
-</body>
-</html>
