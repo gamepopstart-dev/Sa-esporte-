@@ -1,198 +1,198 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Painel SA ESPORTE</title>
-<style>
+<title>SA ESPORTE - Profissional</title>
 
+<style>
 body{
-background:#0b1220;
-color:white;
-font-family:Arial;
+    font-family: Arial;
+    background:#0c0f1a;
+    color:white;
 }
 
-.box{
-background:#1e293b;
-padding:10px;
-margin:10px;
-border-radius:5px;
+.topo{
+    background:#11162a;
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+}
+
+.saldo{
+    color:#00ff88;
+    font-weight:bold;
+}
+
+.jogos{
+    padding:20px;
+}
+
+.jogo{
+    background:#1a1f38;
+    padding:15px;
+    margin:10px;
+    border-radius:10px;
 }
 
 button{
-padding:8px;
-background:#22c55e;
-border:none;
-color:white;
-cursor:pointer;
+    background:#00ff88;
+    border:none;
+    padding:10px;
+    margin:5px;
+    cursor:pointer;
+    font-weight:bold;
 }
 
-.odd{
-background:#facc15;
-color:black;
-padding:5px;
-margin:5px;
-display:inline-block;
-cursor:pointer;
+.bilhete{
+    position:fixed;
+    right:0;
+    top:60px;
+    width:250px;
+    background:#11162a;
+    padding:15px;
+    height:100%;
 }
 
+input{
+    width:100%;
+    padding:10px;
+}
 </style>
+
 </head>
 <body>
 
-<div class="box">
+<div class="topo">
 
-Usuário: <span id="usuario"></span><br>
-Saldo: R$ <span id="saldo"></span>
-
-<br><br>
-
-<button onclick="logout()">Sair</button>
-<button onclick="window.location='admin.html'">Admin</button>
-
+<div>
+Usuário: <span id="usuario">Visitante</span>
 </div>
 
-<div class="box">
-
-<h3>Jogos</h3>
-
-<div onclick="apostar('Time A vs Time B','Casa',1.5)" class="odd">
-Time A vs Time B (1.5)
-</div>
-
-<div onclick="apostar('Time C vs Time D','Fora',2.0)" class="odd">
-Time C vs Time D (2.0)
+<div class="saldo">
+Saldo: R$ <span id="saldo">1000.00</span>
 </div>
 
 </div>
 
-<div class="box">
+<div style="padding:10px">
+<input placeholder="Digite seu nome" id="nomeInput">
+<button onclick="entrar()">Entrar</button>
+</div>
+
+<div class="jogos" id="jogos"></div>
+
+<div class="bilhete">
 
 <h3>Bilhete</h3>
 
-<div id="bilhete">Nenhum</div>
+<div id="bilhete"></div>
 
-Valor:
-<input id="valor" value="10">
+<input type="number" id="valorAposta" placeholder="Valor">
 
-<button onclick="finalizar()">Apostar</button>
-
-</div>
-
-<div class="box">
-
-<h3>Histórico</h3>
-
-<div id="historico"></div>
+<button onclick="apostar()">Apostar</button>
 
 </div>
 
 <script>
 
-var usuario = localStorage.getItem("usuario");
+let usuario = ""
+let saldo = 1000
+let apostaAtual = null
 
-document.getElementById("usuario").innerText = usuario;
+function entrar(){
+
+usuario = document.getElementById("nomeInput").value
+
+document.getElementById("usuario").innerText = usuario
+
+}
 
 function atualizarSaldo(){
-
-document.getElementById("saldo").innerText =
-localStorage.getItem("saldo_"+usuario);
-
+document.getElementById("saldo").innerText = saldo.toFixed(2)
 }
 
-atualizarSaldo();
+function selecionar(time, odd){
 
-var bilhete=null;
-
-function apostar(jogo,tipo,odd){
-
-bilhete={
-jogo,
-tipo,
+apostaAtual = {
+time,
 odd
-};
+}
 
-document.getElementById("bilhete").innerHTML=
-jogo+"<br>"+tipo+" @ "+odd;
+document.getElementById("bilhete").innerHTML =
+usuario + "<br>" +
+time + "<br>" +
+"Odd: " + odd
 
 }
 
-function finalizar(){
+function apostar(){
 
-var valor=parseFloat(document.getElementById("valor").value);
+let valor = document.getElementById("valorAposta").value
 
-var saldo=parseFloat(localStorage.getItem("saldo_"+usuario));
+if(valor > saldo){
 
-if(valor>saldo){
-
-alert("Saldo insuficiente");
-return;
+alert("Saldo insuficiente")
+return
 
 }
 
-saldo-=valor;
+saldo -= valor
 
-localStorage.setItem("saldo_"+usuario,saldo);
+atualizarSaldo()
 
-var apostas=JSON.parse(localStorage.getItem("apostas")||"[]");
-
-apostas.push({
-
-usuario,
-jogo:bilhete.jogo,
-tipo:bilhete.tipo,
-odd:bilhete.odd,
-valor,
-ganho:(valor*bilhete.odd).toFixed(2),
-status:"Pendente"
-
-});
-
-localStorage.setItem("apostas",JSON.stringify(apostas));
-
-alert("Aposta criada");
-
-carregarHistorico();
-
-atualizarSaldo();
+alert("Aposta realizada!")
 
 }
 
-function carregarHistorico(){
+async function carregarJogos(){
 
-var apostas=JSON.parse(localStorage.getItem("apostas")||"[]");
+let response = await fetch("https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all",{
 
-var html="";
+headers:{
+"x-rapidapi-key":"144aa991d7cd08d8f337c28d3ad2bbeb",
+"x-rapidapi-host":"api-football-v1.p.rapidapi.com"
+}
 
-apostas.forEach(a=>{
+})
 
-if(a.usuario==usuario){
+let data = await response.json()
 
-html+=`
-<div>
-${a.jogo}<br>
-Valor: ${a.valor}<br>
-Status: ${a.status}
-<hr>
+let jogosDiv = document.getElementById("jogos")
+
+jogosDiv.innerHTML = ""
+
+data.response.forEach(jogo=>{
+
+let casa = jogo.teams.home.name
+let fora = jogo.teams.away.name
+
+let odd1 = (Math.random()*3+1).toFixed(2)
+let odd2 = (Math.random()*3+1).toFixed(2)
+
+jogosDiv.innerHTML += `
+
+<div class="jogo">
+
+${casa} vs ${fora}
+<br><br>
+
+<button onclick="selecionar('${casa}', ${odd1})">
+${casa} ${odd1}
+</button>
+
+<button onclick="selecionar('${fora}', ${odd2})">
+${fora} ${odd2}
+</button>
+
 </div>
-`;
+
+`
+
+})
 
 }
 
-});
-
-document.getElementById("historico").innerHTML=html;
-
-}
-
-carregarHistorico();
-
-function logout(){
-
-localStorage.clear();
-
-window.location="login.html";
-
-}
+carregarJogos()
 
 </script>
 
