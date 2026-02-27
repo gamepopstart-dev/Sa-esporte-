@@ -2,305 +2,197 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>SA ESPORTE</title>
-
+<title>Painel SA ESPORTE</title>
 <style>
 
 body{
-margin:0;
-font-family:Arial;
 background:#0b1220;
 color:white;
+font-family:Arial;
 }
 
-.topo{
-background:#1f3a8a;
-padding:15px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
-
-.logo{
-font-size:20px;
-font-weight:bold;
-}
-
-.menu button{
-background:#22c55e;
-border:none;
-color:white;
-padding:8px 12px;
-margin-left:5px;
-cursor:pointer;
-}
-
-.container{
-padding:10px;
-}
-
-.liga{
+.box{
 background:#1e293b;
-padding:8px;
-margin-top:10px;
-font-weight:bold;
-}
-
-.jogo{
-background:#0f172a;
 padding:10px;
-border-bottom:1px solid #1e293b;
-}
-
-.times{
-margin-bottom:8px;
-}
-
-.odds{
-display:flex;
-gap:5px;
-}
-
-.odd{
-flex:1;
-background:#facc15;
-color:black;
-padding:10px;
-text-align:center;
-cursor:pointer;
-font-weight:bold;
+margin:10px;
 border-radius:5px;
 }
 
-.odd:hover{
-background:#fde047;
-}
-
-.bilhete{
-position:fixed;
-bottom:0;
-width:100%;
-background:#020617;
-padding:10px;
-border-top:2px solid #1e293b;
-}
-
-input{
-padding:5px;
-width:80px;
-}
-
-button.apostar{
+button{
+padding:8px;
 background:#22c55e;
 border:none;
-padding:10px;
 color:white;
-margin-left:5px;
+cursor:pointer;
+}
+
+.odd{
+background:#facc15;
+color:black;
+padding:5px;
+margin:5px;
+display:inline-block;
 cursor:pointer;
 }
 
 </style>
-
 </head>
 <body>
 
-<div class="topo">
+<div class="box">
 
-<div class="logo">SA ESPORTE</div>
+Usuário: <span id="usuario"></span><br>
+Saldo: R$ <span id="saldo"></span>
 
-<div class="menu">
+<br><br>
 
 <button onclick="logout()">Sair</button>
+<button onclick="window.location='admin.html'">Admin</button>
 
-<button onclick="location.href='admin.html'">Admin</button>
+</div>
 
+<div class="box">
+
+<h3>Jogos</h3>
+
+<div onclick="apostar('Time A vs Time B','Casa',1.5)" class="odd">
+Time A vs Time B (1.5)
+</div>
+
+<div onclick="apostar('Time C vs Time D','Fora',2.0)" class="odd">
+Time C vs Time D (2.0)
 </div>
 
 </div>
 
-<div class="container">
+<div class="box">
 
-<div class="liga">Jogos do Dia</div>
+<h3>Bilhete</h3>
 
-<div id="jogos">
-Carregando jogos...
+<div id="bilhete">Nenhum</div>
+
+Valor:
+<input id="valor" value="10">
+
+<button onclick="finalizar()">Apostar</button>
+
 </div>
 
-</div>
+<div class="box">
 
-<div class="bilhete">
+<h3>Histórico</h3>
 
-Bilhete:
-
-<div id="listaBilhete"></div>
-
-Valor: R$
-<input id="valor" type="number" value="10">
-
-<button class="apostar" onclick="finalizar()">
-Finalizar
-</button>
+<div id="historico"></div>
 
 </div>
 
 <script>
 
-// proteção login
-if(localStorage.getItem("logado")!="sim"){
-location.href="login.html";
-}
+var usuario = localStorage.getItem("usuario");
 
-var bilhete=[];
+document.getElementById("usuario").innerText = usuario;
 
-// carregar jogos reais
-function carregar(){
+function atualizarSaldo(){
 
-fetch("https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=4328")
-
-.then(r=>r.json())
-
-.then(data=>{
-
-var html="";
-
-data.events.forEach(jogo=>{
-
-var casa=jogo.strHomeTeam;
-var fora=jogo.strAwayTeam;
-
-var odd1=(Math.random()*3+1).toFixed(2);
-var oddx=(Math.random()*3+1).toFixed(2);
-var odd2=(Math.random()*3+1).toFixed(2);
-
-html+=`
-
-<div class="jogo">
-
-<div class="times">
-${casa} vs ${fora}
-</div>
-
-<div class="odds">
-
-<div class="odd"
-onclick="add('${casa}','${fora}','Casa',${odd1})">
-${odd1}
-</div>
-
-<div class="odd"
-onclick="add('${casa}','${fora}','Empate',${oddx})">
-${oddx}
-</div>
-
-<div class="odd"
-onclick="add('${casa}','${fora}','Fora',${odd2})">
-${odd2}
-</div>
-
-</div>
-
-</div>
-
-`;
-
-});
-
-document.getElementById("jogos").innerHTML=html;
-
-});
+document.getElementById("saldo").innerText =
+localStorage.getItem("saldo_"+usuario);
 
 }
 
-// adicionar aposta
-function add(casa,fora,tipo,odd){
+atualizarSaldo();
 
-bilhete.push({
+var bilhete=null;
 
-casa,
-fora,
+function apostar(jogo,tipo,odd){
+
+bilhete={
+jogo,
 tipo,
 odd
+};
 
-});
-
-mostrar();
-
-}
-
-// mostrar bilhete
-function mostrar(){
-
-var html="";
-
-bilhete.forEach(b=>{
-
-html+=`
-${b.casa} vs ${b.fora}
-(${b.tipo}) @ ${b.odd}
-<br>
-`;
-
-});
-
-document.getElementById("listaBilhete").innerHTML=html;
+document.getElementById("bilhete").innerHTML=
+jogo+"<br>"+tipo+" @ "+odd;
 
 }
 
-// finalizar aposta
 function finalizar(){
 
-if(bilhete.length==0){
+var valor=parseFloat(document.getElementById("valor").value);
 
-alert("Selecione apostas");
+var saldo=parseFloat(localStorage.getItem("saldo_"+usuario));
 
+if(valor>saldo){
+
+alert("Saldo insuficiente");
 return;
 
 }
 
-var valor=document.getElementById("valor").value;
+saldo-=valor;
 
-var total=1;
+localStorage.setItem("saldo_"+usuario,saldo);
 
-bilhete.forEach(b=>{
-
-total*=b.odd;
-
-});
-
-var retorno=(valor*total).toFixed(2);
-
-// salvar
 var apostas=JSON.parse(localStorage.getItem("apostas")||"[]");
 
 apostas.push({
 
-bilhete,
+usuario,
+jogo:bilhete.jogo,
+tipo:bilhete.tipo,
+odd:bilhete.odd,
 valor,
-retorno,
-data:new Date().toLocaleString()
+ganho:(valor*bilhete.odd).toFixed(2),
+status:"Pendente"
 
 });
 
 localStorage.setItem("apostas",JSON.stringify(apostas));
 
-alert("Aposta feita! Retorno: R$ "+retorno);
+alert("Aposta criada");
 
-bilhete=[];
+carregarHistorico();
 
-mostrar();
+atualizarSaldo();
 
 }
 
-// logout
+function carregarHistorico(){
+
+var apostas=JSON.parse(localStorage.getItem("apostas")||"[]");
+
+var html="";
+
+apostas.forEach(a=>{
+
+if(a.usuario==usuario){
+
+html+=`
+<div>
+${a.jogo}<br>
+Valor: ${a.valor}<br>
+Status: ${a.status}
+<hr>
+</div>
+`;
+
+}
+
+});
+
+document.getElementById("historico").innerHTML=html;
+
+}
+
+carregarHistorico();
+
 function logout(){
 
-localStorage.removeItem("logado");
+localStorage.clear();
 
-location.href="login.html";
+window.location="login.html";
 
 }
-
-carregar();
 
 </script>
 
