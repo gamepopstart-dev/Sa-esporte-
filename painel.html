@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Painel - SA ESPORTE</title>
+<title>SA ESPORTE</title>
 
 <style>
 
@@ -10,34 +10,53 @@ body{
 background:#0f172a;
 color:white;
 font-family:Arial;
+margin:0;
 }
 
 .topo{
 background:#1e3a8a;
 padding:15px;
+display:flex;
+gap:10px;
+align-items:center;
+}
+
+button{
+background:#22c55e;
+border:none;
+color:white;
+padding:8px;
+cursor:pointer;
+}
+
+.container{
+padding:10px;
 }
 
 .jogo{
 background:#1e293b;
-margin:10px;
+margin:10px 0;
 padding:10px;
+border-radius:5px;
 }
 
 .odd{
 background:#facc15;
 color:black;
-padding:5px;
+padding:5px 10px;
 margin:5px;
-cursor:pointer;
 display:inline-block;
+cursor:pointer;
+border-radius:5px;
+font-weight:bold;
 }
 
-button{
-padding:10px;
-margin:10px;
-background:#22c55e;
-border:none;
-color:white;
+.odd:hover{
+background:#fde047;
+}
+
+input{
+padding:5px;
 }
 
 </style>
@@ -47,7 +66,7 @@ color:white;
 
 <div class="topo">
 
-SA ESPORTE
+<b>SA ESPORTE</b>
 
 <button onclick="logout()">Sair</button>
 
@@ -57,31 +76,39 @@ Admin
 
 </div>
 
+<div class="container">
+
 <h3>Jogos</h3>
 
-<div id="jogos"></div>
+<div id="jogos">
+Carregando jogos...
+</div>
 
 <h3>Bilhete</h3>
 
-<div id="bilhete"></div>
+<div id="listaBilhete"></div>
 
 Valor:
-<input id="valor" value="10">
+<input id="valor" type="number" value="10">
 
 <button onclick="finalizar()">Apostar</button>
 
+</div>
+
 <script>
 
+// proteção login
 if(localStorage.getItem("logado")!="sim"){
-
 location.href="login.html";
-
 }
 
+// SUA API KEY
 var apiKey="144aa991d7cd08d8f337c28d3ad2bbeb";
 
+// bilhete
 var bilhete=[];
 
+// logout
 function logout(){
 
 localStorage.removeItem("logado");
@@ -90,94 +117,165 @@ location.href="login.html";
 
 }
 
+// carregar jogos
 function carregar(){
 
-fetch("https://api.sportdataapi.com/api/v1/soccer/matches?apikey="+apiKey)
+fetch("https://api.sportdataapi.com/api/v1/soccer/matches?apikey="+apiKey+"&season_id=3161")
 
-.then(r=>r.json())
+.then(response=>response.json())
 
-.then(d=>{
+.then(data=>{
+
+console.log(data);
+
+if(!data.data){
+
+document.getElementById("jogos").innerHTML="Erro ao carregar jogos";
+return;
+
+}
 
 var html="";
 
-d.data.slice(0,10).forEach(j=>{
+data.data.slice(0,20).forEach(jogo=>{
 
-var o1=(Math.random()*3+1).toFixed(2);
-var o2=(Math.random()*3+1).toFixed(2);
-var o3=(Math.random()*3+1).toFixed(2);
+var casa=jogo.home_team.name;
+var fora=jogo.away_team.name;
+
+var odd1=(Math.random()*3+1).toFixed(2);
+var oddx=(Math.random()*3+1).toFixed(2);
+var odd2=(Math.random()*3+1).toFixed(2);
 
 html+=`
-<div class=jogo>
 
-${j.home_team.name} vs ${j.away_team.name}
+<div class="jogo">
 
-<br>
+<b>${casa} vs ${fora}</b>
 
-<span class=odd onclick="add('${j.home_team.name}','Casa',${o1})">${o1}</span>
+<br><br>
 
-<span class=odd onclick="add('${j.home_team.name}','Empate',${o2})">${o2}</span>
+<span class="odd" onclick="apostar('${casa}','${fora}','Casa',${odd1})">
+${odd1}
+</span>
 
-<span class=odd onclick="add('${j.home_team.name}','Fora',${o3})">${o3}</span>
+<span class="odd" onclick="apostar('${casa}','${fora}','Empate',${oddx})">
+${oddx}
+</span>
+
+<span class="odd" onclick="apostar('${casa}','${fora}','Fora',${odd2})">
+${odd2}
+</span>
 
 </div>
+
 `;
 
 });
 
-jogos.innerHTML=html;
+document.getElementById("jogos").innerHTML=html;
+
+})
+
+.catch(error=>{
+
+document.getElementById("jogos").innerHTML="Erro API ou chave inválida";
 
 });
 
 }
 
-function add(time,tipo,odd){
+// adicionar aposta
+function apostar(casa,fora,tipo,odd){
 
-bilhete.push({time,tipo,odd});
+bilhete.push({
 
-mostrar();
+casa:casa,
+fora:fora,
+tipo:tipo,
+odd:odd
+
+});
+
+mostrarBilhete();
 
 }
 
-function mostrar(){
+// mostrar bilhete
+function mostrarBilhete(){
 
 var html="";
 
 bilhete.forEach(b=>{
 
-html+=b.time+" "+b.tipo+" "+b.odd+"<br>";
+html+=`
+
+<div>
+
+${b.casa} vs ${b.fora}
+
+<br>
+
+${b.tipo} @ ${b.odd}
+
+<hr>
+
+</div>
+
+`;
 
 });
 
-bilhete.innerHTML=html;
+document.getElementById("listaBilhete").innerHTML=html;
 
 }
 
+// finalizar aposta
 function finalizar(){
 
-var valor=valor.value;
+var valor=document.getElementById("valor").value;
 
-var total=1;
+if(bilhete.length==0){
 
-bilhete.forEach(b=>total*=b.odd);
+alert("Selecione apostas");
 
-var ganho=valor*total;
+return;
 
+}
+
+var totalOdd=1;
+
+bilhete.forEach(b=>{
+
+totalOdd*=b.odd;
+
+});
+
+var retorno=(valor*totalOdd).toFixed(2);
+
+// salvar apostas
 var apostas=JSON.parse(localStorage.getItem("apostas")||"[]");
 
 apostas.push({
 
-bilhete,
-valor,
-ganho
+bilhete:bilhete,
+valor:valor,
+retorno:retorno,
+data:new Date().toLocaleString()
 
 });
 
 localStorage.setItem("apostas",JSON.stringify(apostas));
 
-alert("Aposta salva");
+alert("Aposta salva! Retorno: R$ "+retorno);
+
+// limpar bilhete
+bilhete=[];
+
+mostrarBilhete();
 
 }
 
+// iniciar
 carregar();
 
 </script>
