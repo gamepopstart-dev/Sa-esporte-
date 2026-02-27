@@ -4,13 +4,11 @@
 <meta charset="UTF-8">
 <title>Admin</title>
 </head>
-<body style="background:#0f172a;color:white;font-family:Arial">
+<body>
 
-<h2>Painel Admin</h2>
+<h2>Admin SA ESPORTE</h2>
 
 <div id="lista"></div>
-
-<button onclick="limpar()">Limpar apostas</button>
 
 <script>
 
@@ -18,22 +16,50 @@ var apostas=JSON.parse(localStorage.getItem("apostas")||"[]");
 
 var html="";
 
-apostas.forEach(a=>{
+apostas.forEach((a,i)=>{
 
 html+=`
+
+<div>
+
+${a.usuario}<br>
+${a.jogo}<br>
+
+<button onclick="ganhou(${i})">Ganhou</button>
+
+<button onclick="perdeu(${i})">Perdeu</button>
+
 <hr>
-Valor: ${a.valor}
-<br>
-Possível ganho: ${a.ganho}
+
+</div>
+
 `;
 
 });
 
-lista.innerHTML=html;
+document.getElementById("lista").innerHTML=html;
 
-function limpar(){
+function ganhou(i){
 
-localStorage.removeItem("apostas");
+apostas[i].status="Ganha";
+
+var saldo=parseFloat(localStorage.getItem("saldo_"+apostas[i].usuario));
+
+saldo+=parseFloat(apostas[i].ganho);
+
+localStorage.setItem("saldo_"+apostas[i].usuario,saldo);
+
+localStorage.setItem("apostas",JSON.stringify(apostas));
+
+location.reload();
+
+}
+
+function perdeu(i){
+
+apostas[i].status="Perdida";
+
+localStorage.setItem("apostas",JSON.stringify(apostas));
 
 location.reload();
 
