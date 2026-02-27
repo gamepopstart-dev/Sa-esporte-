@@ -2,76 +2,57 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Login - SA ESPORTE</title>
-
+<title>Login SA ESPORTE</title>
 <style>
 body{
-background:#0f172a;
-font-family:Arial;
+background:#0b1220;
 color:white;
-display:flex;
-justify-content:center;
-align-items:center;
-height:100vh;
-}
-
-.box{
-background:#1e293b;
-padding:20px;
-border-radius:10px;
-width:300px;
+font-family:Arial;
 text-align:center;
+margin-top:100px;
 }
-
 input,button{
-width:100%;
 padding:10px;
 margin:5px;
-border:none;
-border-radius:5px;
 }
-
 button{
 background:#22c55e;
+border:none;
 color:white;
-font-weight:bold;
+cursor:pointer;
 }
 </style>
-
 </head>
 <body>
 
-<div class="box">
-
 <h2>SA ESPORTE</h2>
 
-<input id="user" placeholder="Usuário">
-<input id="pass" type="password" placeholder="Senha">
+<input id="user" placeholder="Usuário"><br>
+<input id="pass" type="password" placeholder="Senha"><br>
 
 <button onclick="login()">Entrar</button>
 
-<p id="erro"></p>
-
-</div>
-
 <script>
-
-var USER="admin";
-var PASS="1234";
 
 function login(){
 
-var u=user.value;
-var p=pass.value;
+var u = document.getElementById("user").value;
+var p = document.getElementById("pass").value;
 
-if(u==USER && p==PASS){
+if(u=="admin" && p=="1234"){
 
 localStorage.setItem("logado","sim");
-location.href="painel.html";
+localStorage.setItem("usuario","admin");
+
+if(!localStorage.getItem("saldo_admin")){
+localStorage.setItem("saldo_admin","1000");
+}
+
+window.location.href="painel.html";
 
 }else{
 
-erro.innerHTML="Login incorreto";
+alert("Login incorreto");
 
 }
 
