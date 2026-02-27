@@ -1,62 +1,104 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>SA ESPORTE - Profissional</title>
+<title>SA ESPORTE</title>
 
 <style>
+
 body{
-    font-family: Arial;
-    background:#0c0f1a;
-    color:white;
+margin:0;
+font-family:Arial;
+background:#0b1220;
+color:white;
 }
 
 .topo{
-    background:#11162a;
-    padding:15px;
-    display:flex;
-    justify-content:space-between;
+background:#1f3a8a;
+padding:15px;
+display:flex;
+justify-content:space-between;
+align-items:center;
 }
 
-.saldo{
-    color:#00ff88;
-    font-weight:bold;
+.logo{
+font-size:20px;
+font-weight:bold;
 }
 
-.jogos{
-    padding:20px;
+.menu button{
+background:#22c55e;
+border:none;
+color:white;
+padding:8px 12px;
+margin-left:5px;
+cursor:pointer;
+}
+
+.container{
+padding:10px;
+}
+
+.liga{
+background:#1e293b;
+padding:8px;
+margin-top:10px;
+font-weight:bold;
 }
 
 .jogo{
-    background:#1a1f38;
-    padding:15px;
-    margin:10px;
-    border-radius:10px;
+background:#0f172a;
+padding:10px;
+border-bottom:1px solid #1e293b;
 }
 
-button{
-    background:#00ff88;
-    border:none;
-    padding:10px;
-    margin:5px;
-    cursor:pointer;
-    font-weight:bold;
+.times{
+margin-bottom:8px;
+}
+
+.odds{
+display:flex;
+gap:5px;
+}
+
+.odd{
+flex:1;
+background:#facc15;
+color:black;
+padding:10px;
+text-align:center;
+cursor:pointer;
+font-weight:bold;
+border-radius:5px;
+}
+
+.odd:hover{
+background:#fde047;
 }
 
 .bilhete{
-    position:fixed;
-    right:0;
-    top:60px;
-    width:250px;
-    background:#11162a;
-    padding:15px;
-    height:100%;
+position:fixed;
+bottom:0;
+width:100%;
+background:#020617;
+padding:10px;
+border-top:2px solid #1e293b;
 }
 
 input{
-    width:100%;
-    padding:10px;
+padding:5px;
+width:80px;
 }
+
+button.apostar{
+background:#22c55e;
+border:none;
+padding:10px;
+color:white;
+margin-left:5px;
+cursor:pointer;
+}
+
 </style>
 
 </head>
@@ -64,135 +106,201 @@ input{
 
 <div class="topo">
 
-<div>
-Usuário: <span id="usuario">Visitante</span>
+<div class="logo">SA ESPORTE</div>
+
+<div class="menu">
+
+<button onclick="logout()">Sair</button>
+
+<button onclick="location.href='admin.html'">Admin</button>
+
 </div>
 
-<div class="saldo">
-Saldo: R$ <span id="saldo">1000.00</span>
+</div>
+
+<div class="container">
+
+<div class="liga">Jogos do Dia</div>
+
+<div id="jogos">
+Carregando jogos...
 </div>
 
 </div>
-
-<div style="padding:10px">
-<input placeholder="Digite seu nome" id="nomeInput">
-<button onclick="entrar()">Entrar</button>
-</div>
-
-<div class="jogos" id="jogos"></div>
 
 <div class="bilhete">
 
-<h3>Bilhete</h3>
+Bilhete:
 
-<div id="bilhete"></div>
+<div id="listaBilhete"></div>
 
-<input type="number" id="valorAposta" placeholder="Valor">
+Valor: R$
+<input id="valor" type="number" value="10">
 
-<button onclick="apostar()">Apostar</button>
+<button class="apostar" onclick="finalizar()">
+Finalizar
+</button>
 
 </div>
 
 <script>
 
-let usuario = ""
-let saldo = 1000
-let apostaAtual = null
-
-function entrar(){
-
-usuario = document.getElementById("nomeInput").value
-
-document.getElementById("usuario").innerText = usuario
-
+// proteção login
+if(localStorage.getItem("logado")!="sim"){
+location.href="login.html";
 }
 
-function atualizarSaldo(){
-document.getElementById("saldo").innerText = saldo.toFixed(2)
-}
+var bilhete=[];
 
-function selecionar(time, odd){
+// carregar jogos reais
+function carregar(){
 
-apostaAtual = {
-time,
-odd
-}
+fetch("https://www.thesportsdb.com/api/v1/json/3/eventsnextleague.php?id=4328")
 
-document.getElementById("bilhete").innerHTML =
-usuario + "<br>" +
-time + "<br>" +
-"Odd: " + odd
+.then(r=>r.json())
 
-}
+.then(data=>{
 
-function apostar(){
+var html="";
 
-let valor = document.getElementById("valorAposta").value
+data.events.forEach(jogo=>{
 
-if(valor > saldo){
+var casa=jogo.strHomeTeam;
+var fora=jogo.strAwayTeam;
 
-alert("Saldo insuficiente")
-return
+var odd1=(Math.random()*3+1).toFixed(2);
+var oddx=(Math.random()*3+1).toFixed(2);
+var odd2=(Math.random()*3+1).toFixed(2);
 
-}
-
-saldo -= valor
-
-atualizarSaldo()
-
-alert("Aposta realizada!")
-
-}
-
-async function carregarJogos(){
-
-let response = await fetch("https://api-football-v1.p.rapidapi.com/v3/fixtures?live=all",{
-
-headers:{
-"x-rapidapi-key":"144aa991d7cd08d8f337c28d3ad2bbeb",
-"x-rapidapi-host":"api-football-v1.p.rapidapi.com"
-}
-
-})
-
-let data = await response.json()
-
-let jogosDiv = document.getElementById("jogos")
-
-jogosDiv.innerHTML = ""
-
-data.response.forEach(jogo=>{
-
-let casa = jogo.teams.home.name
-let fora = jogo.teams.away.name
-
-let odd1 = (Math.random()*3+1).toFixed(2)
-let odd2 = (Math.random()*3+1).toFixed(2)
-
-jogosDiv.innerHTML += `
+html+=`
 
 <div class="jogo">
 
+<div class="times">
 ${casa} vs ${fora}
-<br><br>
+</div>
 
-<button onclick="selecionar('${casa}', ${odd1})">
-${casa} ${odd1}
-</button>
+<div class="odds">
 
-<button onclick="selecionar('${fora}', ${odd2})">
-${fora} ${odd2}
-</button>
+<div class="odd"
+onclick="add('${casa}','${fora}','Casa',${odd1})">
+${odd1}
+</div>
+
+<div class="odd"
+onclick="add('${casa}','${fora}','Empate',${oddx})">
+${oddx}
+</div>
+
+<div class="odd"
+onclick="add('${casa}','${fora}','Fora',${odd2})">
+${odd2}
+</div>
 
 </div>
 
-`
+</div>
 
-})
+`;
+
+});
+
+document.getElementById("jogos").innerHTML=html;
+
+});
 
 }
 
-carregarJogos()
+// adicionar aposta
+function add(casa,fora,tipo,odd){
+
+bilhete.push({
+
+casa,
+fora,
+tipo,
+odd
+
+});
+
+mostrar();
+
+}
+
+// mostrar bilhete
+function mostrar(){
+
+var html="";
+
+bilhete.forEach(b=>{
+
+html+=`
+${b.casa} vs ${b.fora}
+(${b.tipo}) @ ${b.odd}
+<br>
+`;
+
+});
+
+document.getElementById("listaBilhete").innerHTML=html;
+
+}
+
+// finalizar aposta
+function finalizar(){
+
+if(bilhete.length==0){
+
+alert("Selecione apostas");
+
+return;
+
+}
+
+var valor=document.getElementById("valor").value;
+
+var total=1;
+
+bilhete.forEach(b=>{
+
+total*=b.odd;
+
+});
+
+var retorno=(valor*total).toFixed(2);
+
+// salvar
+var apostas=JSON.parse(localStorage.getItem("apostas")||"[]");
+
+apostas.push({
+
+bilhete,
+valor,
+retorno,
+data:new Date().toLocaleString()
+
+});
+
+localStorage.setItem("apostas",JSON.stringify(apostas));
+
+alert("Aposta feita! Retorno: R$ "+retorno);
+
+bilhete=[];
+
+mostrar();
+
+}
+
+// logout
+function logout(){
+
+localStorage.removeItem("logado");
+
+location.href="login.html";
+
+}
+
+carregar();
 
 </script>
 
