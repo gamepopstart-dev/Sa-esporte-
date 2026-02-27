@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
 <meta charset="UTF-8">
-<title>SA ESPORTE</title>
+<title>Painel - SA ESPORTE</title>
 
 <style>
 
@@ -10,67 +10,34 @@ body{
 background:#0f172a;
 color:white;
 font-family:Arial;
-margin:0;
 }
 
 .topo{
 background:#1e3a8a;
 padding:15px;
-font-size:20px;
-}
-
-.container{
-padding:10px;
 }
 
 .jogo{
 background:#1e293b;
-margin:10px 0;
+margin:10px;
 padding:10px;
-border-radius:5px;
-}
-
-.times{
-margin-bottom:10px;
-}
-
-.odds{
-display:flex;
-gap:10px;
 }
 
 .odd{
 background:#facc15;
 color:black;
-padding:10px;
-flex:1;
-text-align:center;
+padding:5px;
+margin:5px;
 cursor:pointer;
-border-radius:5px;
-font-weight:bold;
-}
-
-.odd:hover{
-background:#fde047;
-}
-
-.bilhete{
-position:fixed;
-bottom:0;
-width:100%;
-background:#020617;
-padding:10px;
+display:inline-block;
 }
 
 button{
-background:#22c55e;
-color:white;
-border:none;
 padding:10px;
-width:100%;
-font-size:16px;
-margin-top:5px;
-cursor:pointer;
+margin:10px;
+background:#22c55e;
+border:none;
+color:white;
 }
 
 </style>
@@ -79,149 +46,139 @@ cursor:pointer;
 <body>
 
 <div class="topo">
+
 SA ESPORTE
-</div>
 
-<div class="container">
+<button onclick="logout()">Sair</button>
 
-<h3>Jogos do dia</h3>
-
-<div id="jogos">
-Carregando jogos...
-</div>
+<button onclick="location.href='admin.html'">
+Admin
+</button>
 
 </div>
 
-<div class="bilhete">
+<h3>Jogos</h3>
 
-Valor: R$ <input type="number" id="valor" value="10">
+<div id="jogos"></div>
 
-<button onclick="finalizar()">Finalizar Aposta</button>
+<h3>Bilhete</h3>
 
-<div id="listaBilhete"></div>
+<div id="bilhete"></div>
 
-</div>
+Valor:
+<input id="valor" value="10">
+
+<button onclick="finalizar()">Apostar</button>
 
 <script>
 
-var apiKey = "144aa991d7cd08d8f337c28d3ad2bbeb";
+if(localStorage.getItem("logado")!="sim"){
 
-var bilhete = [];
+location.href="login.html";
 
-function carregarJogos(){
+}
+
+var apiKey="144aa991d7cd08d8f337c28d3ad2bbeb";
+
+var bilhete=[];
+
+function logout(){
+
+localStorage.removeItem("logado");
+
+location.href="login.html";
+
+}
+
+function carregar(){
 
 fetch("https://api.sportdataapi.com/api/v1/soccer/matches?apikey="+apiKey)
 
 .then(r=>r.json())
 
-.then(data=>{
+.then(d=>{
 
 var html="";
 
-data.data.slice(0,10).forEach(function(jogo){
+d.data.slice(0,10).forEach(j=>{
 
-var casa = jogo.home_team.name;
-var fora = jogo.away_team.name;
+var o1=(Math.random()*3+1).toFixed(2);
+var o2=(Math.random()*3+1).toFixed(2);
+var o3=(Math.random()*3+1).toFixed(2);
 
-var odd1 = (Math.random()*3+1).toFixed(2);
-var oddx = (Math.random()*3+1).toFixed(2);
-var odd2 = (Math.random()*3+1).toFixed(2);
+html+=`
+<div class=jogo>
 
-html += `
-<div class="jogo">
+${j.home_team.name} vs ${j.away_team.name}
 
-<div class="times">
-${casa} vs ${fora}
-</div>
-
-<div class="odds">
-
-<div class="odd" onclick="apostar('${casa}','${fora}','Casa',${odd1})">
-${odd1}
-</div>
-
-<div class="odd" onclick="apostar('${casa}','${fora}','Empate',${oddx})">
-${oddx}
-</div>
-
-<div class="odd" onclick="apostar('${casa}','${fora}','Fora',${odd2})">
-${odd2}
-</div>
-
-</div>
-
-</div>
-`;
-
-});
-
-document.getElementById("jogos").innerHTML = html;
-
-});
-
-}
-
-function apostar(casa,fora,tipo,odd){
-
-bilhete.push({
-casa,
-fora,
-tipo,
-odd
-});
-
-mostrarBilhete();
-
-}
-
-function mostrarBilhete(){
-
-var html="";
-
-bilhete.forEach(function(b){
-
-html += `
-<div>
-${b.casa} vs ${b.fora}
 <br>
-${b.tipo} @ ${b.odd}
-<hr>
+
+<span class=odd onclick="add('${j.home_team.name}','Casa',${o1})">${o1}</span>
+
+<span class=odd onclick="add('${j.home_team.name}','Empate',${o2})">${o2}</span>
+
+<span class=odd onclick="add('${j.home_team.name}','Fora',${o3})">${o3}</span>
+
 </div>
 `;
 
 });
 
-document.getElementById("listaBilhete").innerHTML = html;
+jogos.innerHTML=html;
+
+});
+
+}
+
+function add(time,tipo,odd){
+
+bilhete.push({time,tipo,odd});
+
+mostrar();
+
+}
+
+function mostrar(){
+
+var html="";
+
+bilhete.forEach(b=>{
+
+html+=b.time+" "+b.tipo+" "+b.odd+"<br>";
+
+});
+
+bilhete.innerHTML=html;
 
 }
 
 function finalizar(){
 
-var valor = document.getElementById("valor").value;
+var valor=valor.value;
 
-var totalOdd=1;
+var total=1;
 
-bilhete.forEach(function(b){
+bilhete.forEach(b=>total*=b.odd);
 
-totalOdd *= b.odd;
+var ganho=valor*total;
+
+var apostas=JSON.parse(localStorage.getItem("apostas")||"[]");
+
+apostas.push({
+
+bilhete,
+valor,
+ganho
 
 });
 
-var retorno = (valor*totalOdd).toFixed(2);
+localStorage.setItem("apostas",JSON.stringify(apostas));
 
-alert(
-"Aposta finalizada!\n"+
-"Valor: R$ "+valor+"\n"+
-"Retorno possível: R$ "+retorno
-);
-
-bilhete=[];
-
-mostrarBilhete();
+alert("Aposta salva");
 
 }
 
-carregarJogos();
+carregar();
 
 </script>
 
