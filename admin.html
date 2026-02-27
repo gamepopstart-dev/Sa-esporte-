@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Admin</title>
+</head>
+<body style="background:#0f172a;color:white;font-family:Arial">
+
+<h2>Painel Admin</h2>
+
+<div id="lista"></div>
+
+<button onclick="limpar()">Limpar apostas</button>
+
+<script>
+
+var apostas=JSON.parse(localStorage.getItem("apostas")||"[]");
+
+var html="";
+
+apostas.forEach(a=>{
+
+html+=`
+<hr>
+Valor: ${a.valor}
+<br>
+Possível ganho: ${a.ganho}
+`;
+
+});
+
+lista.innerHTML=html;
+
+function limpar(){
+
+localStorage.removeItem("apostas");
+
+location.reload();
+
+}
+
+</script>
+
+</body>
+</html>
