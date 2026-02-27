@@ -1,33 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Login - SA ESPORTE</title>
+
+<style>
+body{
+background:#0f172a;
+font-family:Arial;
+color:white;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+}
+
+.box{
+background:#1e293b;
+padding:20px;
+border-radius:10px;
+width:300px;
+text-align:center;
+}
+
+input,button{
+width:100%;
+padding:10px;
+margin:5px;
+border:none;
+border-radius:5px;
+}
+
+button{
+background:#22c55e;
+color:white;
+font-weight:bold;
+}
+</style>
+
+</head>
+<body>
+
+<div class="box">
+
+<h2>SA ESPORTE</h2>
+
+<input id="user" placeholder="Usuário">
+<input id="pass" type="password" placeholder="Senha">
+
+<button onclick="login()">Entrar</button>
+
+<p id="erro"></p>
+
+</div>
+
 <script>
-function login(email, senha) {
-  auth.signInWithEmailAndPassword(email, senha)
-    .then((userCred) => {
 
-      alert("Login realizado!");
+var USER="admin";
+var PASS="1234";
 
-      // 🔥 Pega o saldo do usuário
-      db.collection("users").doc(userCred.user.uid).get()
-        .then((doc) => {
+function login(){
 
-          const saldo = doc.data().saldo;
+var u=user.value;
+var p=pass.value;
 
-          // 🔥 Mostra nova tela
-          document.body.innerHTML = `
-            <h1>Bem-vindo!</h1>
-            <h2>Seu saldo: R$ ${saldo}</h2>
-            <button onclick="logout()">Sair</button>
-          `;
-        });
+if(u==USER && p==PASS){
 
-    })
-    .catch((error) => {
-      alert(error.message);
-    });
+localStorage.setItem("logado","sim");
+location.href="painel.html";
+
+}else{
+
+erro.innerHTML="Login incorreto";
+
 }
 
-function logout() {
-  auth.signOut().then(() => {
-    location.reload();
-  });
 }
+
 </script>
+
+</body>
+</html>
