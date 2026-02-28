@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Histórico</title>
+<style>
+body{
+background:#0b1220;
+color:white;
+font-family:Arial;
+}
+.aposta{
+background:#1e293b;
+margin:10px;
+padding:10px;
+}
+</style>
+</head>
+<body>
+
+<h2>Histórico</h2>
+
+<div id="lista"></div>
+
+<script>
+
+var apostas =
+JSON.parse(localStorage.getItem("apostas") || "[]");
+
+var html="";
+
+apostas.reverse().forEach(a=>{
+
+html+=`
+
+<div class="aposta">
+
+Usuário: ${a.usuario}<br>
+Valor: R$ ${a.valor}<br>
+Retorno: R$ ${a.retorno}<br>
+Status: ${a.status}<br>
+Data: ${a.data}
+
+</div>
+
+`;
+
+});
+
+document.getElementById("lista").innerHTML=html;
+
+</script>
+
+</body>
+</html>
