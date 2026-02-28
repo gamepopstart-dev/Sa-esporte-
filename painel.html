@@ -35,8 +35,15 @@ margin-left:5px;
 cursor:pointer;
 }
 
+.saldo{
+color:#22c55e;
+font-weight:bold;
+margin-left:10px;
+}
+
 .container{
 padding:10px;
+margin-bottom:120px;
 }
 
 .liga{
@@ -106,13 +113,29 @@ cursor:pointer;
 
 <div class="topo">
 
-<div class="logo">SA ESPORTE</div>
+<div class="logo">
+SA ESPORTE
+</div>
+
+<div>
+
+<span id="nomeUsuario"></span>
+
+<span class="saldo">
+Saldo: R$ <span id="saldo"></span>
+</span>
+
+</div>
 
 <div class="menu">
 
-<button onclick="logout()">Sair</button>
+<button onclick="location.href='historico.html'">
+Histórico
+</button>
 
-<button onclick="location.href='admin.html'">Admin</button>
+<button onclick="logout()">
+Sair
+</button>
 
 </div>
 
@@ -147,10 +170,45 @@ Finalizar
 
 // proteção login
 if(localStorage.getItem("logado")!="sim"){
+
 location.href="login.html";
+
 }
 
+// carregar usuário
+var usuario = JSON.parse(localStorage.getItem("usuario"));
+
+if(!usuario){
+
+usuario = {
+
+nome:"Usuário",
+saldo:1000
+
+};
+
+localStorage.setItem("usuario", JSON.stringify(usuario));
+
+}
+
+// mostrar nome
+document.getElementById("nomeUsuario").innerText =
+usuario.nome;
+
+// mostrar saldo
+function atualizarSaldo(){
+
+var user = JSON.parse(localStorage.getItem("usuario"));
+
+document.getElementById("saldo").innerText =
+user.saldo.toFixed(2);
+
+}
+
+atualizarSaldo();
+
 var bilhete=[];
+
 
 // carregar jogos reais
 function carregar(){
@@ -211,21 +269,23 @@ document.getElementById("jogos").innerHTML=html;
 
 }
 
+
 // adicionar aposta
 function add(casa,fora,tipo,odd){
 
 bilhete.push({
 
-casa,
-fora,
-tipo,
-odd
+casa:casa,
+fora:fora,
+tipo:tipo,
+odd:parseFloat(odd)
 
 });
 
 mostrar();
 
 }
+
 
 // mostrar bilhete
 function mostrar(){
@@ -246,18 +306,27 @@ document.getElementById("listaBilhete").innerHTML=html;
 
 }
 
+
 // finalizar aposta
 function finalizar(){
 
 if(bilhete.length==0){
 
 alert("Selecione apostas");
-
 return;
 
 }
 
-var valor=document.getElementById("valor").value;
+var valor=parseFloat(document.getElementById("valor").value);
+
+var user=JSON.parse(localStorage.getItem("usuario"));
+
+if(valor > user.saldo){
+
+alert("Saldo insuficiente");
+return;
+
+}
 
 var total=1;
 
@@ -269,27 +338,39 @@ total*=b.odd;
 
 var retorno=(valor*total).toFixed(2);
 
-// salvar
-var apostas=JSON.parse(localStorage.getItem("apostas")||"[]");
+// descontar saldo
+user.saldo -= valor;
+
+localStorage.setItem("usuario", JSON.stringify(user));
+
+// salvar aposta
+var apostas =
+JSON.parse(localStorage.getItem("apostas") || "[]");
 
 apostas.push({
 
-bilhete,
-valor,
-retorno,
-data:new Date().toLocaleString()
+usuario:user.nome,
+bilhete:bilhete,
+valor:valor,
+retorno:retorno,
+data:new Date().toLocaleString(),
+status:"pendente"
 
 });
 
-localStorage.setItem("apostas",JSON.stringify(apostas));
+localStorage.setItem("apostas",
+JSON.stringify(apostas));
 
-alert("Aposta feita! Retorno: R$ "+retorno);
+alert("Aposta realizada com sucesso");
 
 bilhete=[];
 
 mostrar();
 
+atualizarSaldo();
+
 }
+
 
 // logout
 function logout(){
@@ -300,6 +381,8 @@ location.href="login.html";
 
 }
 
+
+// iniciar
 carregar();
 
 </script>
